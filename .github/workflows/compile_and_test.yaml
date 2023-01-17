@@ -1,0 +1,116 @@
+name: compile_and_test
+
+on:
+  push:
+    branches: [ main ]
+
+  pull_request:
+    branches: [ main ]
+
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  boost_version: 1.81.0
+  boost_version_fname: 1_81_0
+
+jobs:
+  build_and_test:
+    name: 'Build & test gupty on ${{ matrix.os }}'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-22.04
+          - macos-11
+
+    steps:
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v2
+
+      - name: 'cache boost'
+        id: cache-boost
+        uses: actions/cache@v3
+        with:
+          path: ~/boost
+          key: ${{ matrix.os }}-boost-${{ env.boost_version }}
+
+      - name: 'compile boost'
+        run: |
+          aria2c https://boostorg.jfrog.io/artifactory/main/release/${{ env.boost_version }}/source/boost_${{ env.boost_version_fname }}.tar.bz2
+          tar xf boost_${{ env.boost_version_fname }}.tar.bz2
+          prefix="$HOME/boost"
+          cd boost_${{ env.boost_version_fname }}
+          ./bootstrap.sh --prefix="$prefix" --with-libraries=log,program_options,container --without-icu
+          ./b2 install link=static variant=release threading=multi
+        shell: bash
+        if: steps.cache-boost.outputs.cache-hit != 'true'
+
+      - name: 'Setup'
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DBOOST_ROOT="$HOME/boost"
+
+      - name: 'Compile'
+        run: |
+          cmake --build build --parallel $(getconf _NPROCESSORS_ONLN)
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.os }}-${{ github.sha }}-binary
+          path: build/gupty
+
+      #- uses: actions/upload-artifact@v3
+      #  with:
+      #    name: ${{ matrix.os }}-${{ github.sha }}-build-dir
+      #    path: build
+
+      - name: 'Test: libdeps (Linux)'
+        if: runner.os == 'Linux'
+        run: |
+          ldd build/gupty
+
+      - name: 'Test: libdeps (macOS)'
+        if: runner.os == 'macOS'
+        run: |
+          otool -L build/gupty
+
+      - name: 'Test: Usage'
+        run: |
+          build/gupty
+
+      - name: 'Install tools for macOS'
+        if: runner.os == 'macOS'
+        run: |
+          brew install tmux
+
+      - name: 'Test: run'
+        run: |
+          ls -la
+          tmux new-session -d 'rm -f result output ; build/gupty -d test/type_test.gupty ; echo $? > result ; date > date2 ; tmux capture-pane -epS - > output ; sleep 0.5' \; run-shell 'sleep 0.5' \; send-keys kkkkkkkkkkkkkk Enter kkkkkkkkkkkkkkkkkkkkkkkkkk Enter \; run-shell 'sleep 0.5'
+          sleep 0.5
+          ls -la
+
+      - name: 'Test: exit code'
+        run: |
+          cat result || true
+
+      - name: 'Test: screen contents'
+        run: |
+          cat output || true
+
+      - name: 'Test: log contents'
+        run: |
+          cat gupty.log || true
+
+      - name: 'Test: ensure exit code is 0'
+        run: |
+          test "$(<result)" = 0
+
+      #- uses: actions/upload-artifact@v3
+      #  with:
+      #    name: ${{ matrix.os }}-${{ github.sha }}-everything
+      #    path: ${{ github.workspace }}
+

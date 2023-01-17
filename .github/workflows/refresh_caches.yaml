@@ -1,0 +1,41 @@
+name: refresh_caches
+
+on:
+  schedule:
+    - cron: '12 12 * * 1,4'
+
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  boost_version: 1.81.0
+
+jobs:
+  refresh_boost:
+    name: 'Refresh cached boost builds'
+    runs-on: ubuntu-22.04
+
+    strategy:
+      matrix:
+        os:
+          - ubuntu-22.04
+          - macos-11
+
+    steps:
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v2
+
+      - name: 'cache boost'
+        uses: actions/cache@v3
+        with:
+          path: ~/boost
+          key: ${{ matrix.os }}-boost-${{ env.boost_version }}
+          enableCrossOsArchive: true
+
+      - name: 'Size'
+        run: |
+          du -shc ~/boost
+

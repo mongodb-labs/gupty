@@ -1,0 +1,4 @@
+build*/
+.*.swp
+.gupty.monitor
+gupty.log

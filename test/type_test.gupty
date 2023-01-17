@@ -1,0 +1,9 @@
+
+type_line #foo bar baz
+pause 100
+type_keys Up Left Left Left Left Left Left Left
+type fred 
+type_keys Right Right Right Right
+type_line barney 
+exit
+
