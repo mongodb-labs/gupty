@@ -1,0 +1,58 @@
+pause 200
+paste_line # This is the window that you show to the audience.
+pause 50
+paste_line #
+pause 50
+paste_line # The window on the left is one that only you can see,
+pause 50
+paste_line # and can show where you're up to in the demo.
+
+type_line # Simple command line work - how to build gupty from source code
+
+note --- DOWNLOAD ---
+type_line # First download the source code
+type git clone 
+paste https://github.com/mongodb-labs/gupty
+wait_for_and_send_enter
+type_line cd gupty
+type_line ls -la
+
+note --- CONFIGURE ---
+type_line # Use cmake to configure a build in the `build` subdir
+type_line cmake -S . -B build
+type_line ls -la
+
+note --- BUILD ---
+type_line # Now do the build, by modifying the previous line
+type_keys Up Up Up
+type_keys Left Left Left Left Left Left
+type_keys Backspace Backspace Backspace Backspace Backspace Backspace Backspace
+type_line --build
+
+note --- PASSTHROUGH ---
+note --- drop to passthrough here and randomly test the binary
+note --- ctrl-d to exit passthrough mode
+note --- then 'i' to resume the script
+
+note --- CLEANUP ---
+type_line # Clean up
+type_line cd ..
+type_line rm -rf gupty
+
+note --- OTHER PROGRAMS ---
+type_line # Since it's a live demo, you can interact with more than just the shell
+type_line watch --interval 0.25 date -Ins
+type 
+type_line htop -d2
+type q
+type_line gnuplot
+type_line plot sin(x)
+wait_for_any_key
+paste 
+type kwcw
+type_line cos
+type_line exit
+
+note --- END ---
+wait_for_any_key
+exit

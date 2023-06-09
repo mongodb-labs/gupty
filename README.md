@@ -1,7 +1,11 @@
 `gupty` - guided pseudo terminal
 ================================
 
-**A utility that lets you give truly live terminal demos which are just as smooth as pre-recorded ones.**
+**Live terminal demos that are just as smooth as pre-recorded**
+
+![Gupty demo](./demo/readme-demo.gif)
+
+[[larger](./demo/readme-demo.gif)] [[mp4](./demo/readme-demo.mp4)] [[youtube](https://www.youtube.com/watch?v=9dgrDjldbPA)] [[source](./demo/readme-demo.gupty)]
 
 As you type, `gupty` feeds your scripted input to the terminal, rather than the characters you're typing.  This means you don't have to worry about making typos.  However, the demo is still live, and you can drop to a passthrough mode if you want to go off-script (eg. if someone asks an unexpected question), or need to fix something unexpectedly.  There's also a way to monitor where you're up to in the demo, so that you know what's coming up and aren't typing blindly.
 
